@@ -96,7 +96,7 @@ def build_prompt(code_snippet):
     [Список из 3-х приоритетных действий]
     
     ОЦЕНКА: [X]/6 (Проходной балл)
-    """
+    "
 
 def analyze_code(endpoint, prompt):
     """Send request to Ollama."""

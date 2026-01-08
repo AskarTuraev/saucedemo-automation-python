@@ -1,61 +1,93 @@
-# Gemini Code Reviewer for VS Code
+# AI Code Reviewer (Ollama Edition)
 
-A lightweight Python tool integrated into VS Code to perform AI-powered code reviews on selected snippets using the Google Gemini API.
+Легковесный инструмент на Python, интегрированный в VS Code, для проведения код-ревью с использованием локальных LLM через **Ollama**.
 
-## Features
+По умолчанию настроен на использование модели **gemma3**.
 
-- Analyzes selected code directly from the VS Code editor.
-- Uses **Gemini 3.0 Pro** for deep, high-quality analysis.
-- Evaluates code based on 6 key pillars:
-  1. Reliability & Stability
-  2. Asserts & Verifiability
-  3. Readability
-  4. Hardcoding & Test Data
-  5. DRY Principles
-  6. Architecture
+## ✨ Возможности
 
-## Setup
+- Анализирует выделенный код прямо из редактора VS Code.
+- Использует локальный сервер Ollama (бесплатно, приватно, без отправки кода в облако).
+- Оценивает код по 6 критериям:
+  1. Надежность и стабильность
+  2. Проверки (Asserts)
+  3. Читаемость
+  4. Хардкод
+  5. DRY (повторяемость)
+  6. Архитектура
 
-### 1. Prerequisites
-- Python 3.8+
-- VS Code
+## ⚙️ Установка
 
-### 2. Installation
+### 1. Предварительные требования
+- **Python 3.8+**
+- **Ollama**: Должен быть установлен и запущен. [Скачать Ollama](https://ollama.com/).
+- **Model**: Загрузите модель `gemma3` (или другую желаемую):
+  ```bash
+  ollama pull gemma3
+  ```
 
-1. Open a terminal in the `code_reviewer` folder:
+### 2. Установка зависимостей проекта
+
+1. Откройте терминал в папке `code_reviewer`:
    ```bash
    cd code_reviewer
    ```
 
-2. Install dependencies:
+2. Установите библиотеки Python:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Configure API Key:
-   - Rename `.env.example` to `.env`:
-     - **Windows (CMD):** `ren .env.example .env`
-     - **PowerShell:** `Rename-Item .env.example .env`
-     - **Linux/Mac:** `mv .env.example .env`
-   - Open `.env` and paste your Google Gemini API key.
+### 3. Настройка (VS Code)
 
-### 3. Usage
+1. Откройте любой файл с кодом.
+2. **Выделите код**, который хотите проверить.
+3. Нажмите `Ctrl+Shift+P` -> **Run Task** -> **Local Code Reviewer**.
 
-1. Open any code file in VS Code.
-2. **Select the code** you want to review.
-3. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
-4. Type **"Run Task"** and select it.
-5. Choose **"Local Code Reviewer"**.
+(Задача уже настроена в `.vscode/tasks.json`).
 
-The results will appear in the VS Code Terminal panel.
+---
 
-### 4. (Optional) Keybinding Shortcut
+## 🔄 Как сменить модель (Инструкция)
 
-To make it feel like a native feature, add a keyboard shortcut:
+Скрипт отправляет запросы на локальный API Ollama. Вы можете использовать любую модель, доступную в библиотеке Ollama (Llama 3, Mistral, CodeLlama и т.д.).
 
-1. Open `File > Preferences > Keyboard Shortcuts` (`Ctrl+K Ctrl+S`).
-2. Click the `Open Keyboard Shortcuts (JSON)` icon in the top right.
-3. Add this entry:
+### Способ: Изменение в коде (reviewer.py)
+
+1. Откройте файл `code_reviewer/reviewer.py`.
+2. Найдите функцию `analyze_code` (примерно строка 80).
+3. Измените значение поля `"model"`.
+
+**Пример для Llama 3:**
+```python
+    payload = {
+        "model": "llama3",  # <--- Поменяйте "gemma3" на "llama3"
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "stream": False
+    }
+```
+
+**Пример для DeepSeek Coder:**
+```python
+    payload = {
+        "model": "deepseek-coder",  # <--- Поменяйте на имя вашей модели
+        ...
+    }
+```
+
+> **Важно:** Не забудьте предварительно скачать модель через терминал: `ollama pull llama3` или `ollama pull deepseek-coder`.
+
+---
+
+## ⌨️ Горячие клавиши
+
+Чтобы добавить удобный шорткат (например, `Ctrl+Alt+R`):
+
+1. `File > Preferences > Keyboard Shortcuts` (`Ctrl+K Ctrl+S`).
+2. Откройте JSON (иконка справа сверху).
+3. Добавьте:
 
 ```json
 {
@@ -64,16 +96,3 @@ To make it feel like a native feature, add a keyboard shortcut:
     "args": "Local Code Reviewer"
 }
 ```
-
-Now you can simply select code and press `Ctrl+Alt+R`!
-
-## 📦 Using in Other Projects
-
-This tool is designed to be standalone. You can easily add it to any other workspace:
-
-1.  **Copy Folder:** Copy the entire `code_reviewer` directory to the root of your target project.
-2.  **Install Deps:** Run `pip install -r code_reviewer/requirements.txt`.
-3.  **Setup Key:** Create the `.env` file with your key inside `code_reviewer/`.
-4.  **Run:** You can either:
-    *   Use the VS Code Tasks integration (copy the `.vscode/tasks.json` configuration).
-    *   OR install the local VS Code Extension included in `vscode_extension/` for a nicer context menu integration.
