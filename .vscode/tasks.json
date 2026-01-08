@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "python",
             "args": [
-                "${workspaceFolder}/gemini_code_reviewer/reviewer.py",
+                "${workspaceFolder}/code_reviewer/reviewer.py",
                 "--file",
                 "${file}",
                 "--start",
