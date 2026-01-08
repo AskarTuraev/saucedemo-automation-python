@@ -9,7 +9,44 @@ def is_admin():
     except:
         return False
 
+def remove_old_keys():
+    """Removes old registry keys to avoid duplicates."""
+    old_keys = ["GeminiReview"]
+    reg_path = r"Software\Classes\*\shell"
+    
+    try:
+        parent_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+    except FileNotFoundError:
+        return
+
+    for key_name in old_keys:
+        try:
+            # Try to open the key to see if it exists
+            key_to_delete = winreg.OpenKey(parent_key, key_name, 0, winreg.KEY_ALL_ACCESS)
+            
+            # Delete subkeys first (command)
+            try:
+                winreg.DeleteKey(key_to_delete, "command")
+            except FileNotFoundError:
+                pass
+                
+            winreg.CloseKey(key_to_delete)
+            
+            # Delete the main key
+            winreg.DeleteKey(parent_key, key_name)
+            print(f"Removed old context menu item: {key_name}")
+            
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            print(f"Could not remove old key {key_name}: {e}")
+
+    winreg.CloseKey(parent_key)
+
 def register_context_menu():
+    # Remove old keys first
+    remove_old_keys()
+
     # Get paths
     current_dir = os.path.dirname(os.path.abspath(__file__))
     reviewer_script = os.path.join(current_dir, "reviewer.py")
