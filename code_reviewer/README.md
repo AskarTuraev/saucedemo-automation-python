@@ -5,7 +5,7 @@ A lightweight Python tool integrated into VS Code to perform AI-powered code rev
 ## Features
 
 - Analyzes selected code directly from the VS Code editor.
-- Uses **Gemini 1.5 Flash** for fast, high-quality feedback.
+- Uses **Gemini 3.0 Pro** for deep, high-quality analysis.
 - Evaluates code based on 6 key pillars:
   1. Reliability & Stability
   2. Asserts & Verifiability
@@ -22,9 +22,9 @@ A lightweight Python tool integrated into VS Code to perform AI-powered code rev
 
 ### 2. Installation
 
-1. Open a terminal in the `gemini_code_reviewer` folder:
+1. Open a terminal in the `code_reviewer` folder:
    ```bash
-   cd gemini_code_reviewer
+   cd code_reviewer
    ```
 
 2. Install dependencies:
@@ -66,3 +66,14 @@ To make it feel like a native feature, add a keyboard shortcut:
 ```
 
 Now you can simply select code and press `Ctrl+Alt+R`!
+
+## 📦 Using in Other Projects
+
+This tool is designed to be standalone. You can easily add it to any other workspace:
+
+1.  **Copy Folder:** Copy the entire `code_reviewer` directory to the root of your target project.
+2.  **Install Deps:** Run `pip install -r code_reviewer/requirements.txt`.
+3.  **Setup Key:** Create the `.env` file with your key inside `code_reviewer/`.
+4.  **Run:** You can either:
+    *   Use the VS Code Tasks integration (copy the `.vscode/tasks.json` configuration).
+    *   OR install the local VS Code Extension included in `vscode_extension/` for a nicer context menu integration.

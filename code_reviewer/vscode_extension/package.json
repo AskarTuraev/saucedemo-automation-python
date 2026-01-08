@@ -1,0 +1,32 @@
+{
+  "name": "code-reviewer-local",
+  "displayName": "AI Code Reviewer",
+  "description": "Local extension to invoke AI Code Reviewer script",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "reviewer.reviewSelection",
+        "title": "Code Review: Review Selection"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "reviewer.reviewSelection",
+          "group": "navigation",
+          "when": "editorHasSelection"
+        }
+      ]
+    }
+  }
+}
