@@ -40,9 +40,9 @@ function activate(context) {
         }
 
         // Output Channel
-        const outputChannel = vscode.window.createOutputChannel("AI Code Reviewer");
+        const outputChannel = vscode.window.createOutputChannel("Local Code Reviewer");
         outputChannel.show();
-        outputChannel.appendLine("Starting AI Code Review...");
+        outputChannel.appendLine("Starting Local Code Reviewer...");
 
         // Args
         const startLine = selection.start.line + 1;

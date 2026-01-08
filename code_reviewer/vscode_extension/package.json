@@ -16,7 +16,7 @@
     "commands": [
       {
         "command": "reviewer.reviewSelection",
-        "title": "Code Review: Review Selection"
+        "title": "Local Code Reviewer"
       }
     ],
     "menus": {

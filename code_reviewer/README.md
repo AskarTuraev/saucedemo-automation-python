@@ -45,7 +45,7 @@ A lightweight Python tool integrated into VS Code to perform AI-powered code rev
 2. **Select the code** you want to review.
 3. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
 4. Type **"Run Task"** and select it.
-5. Choose **"Gemini: Review Selected Code"**.
+5. Choose **"Local Code Reviewer"**.
 
 The results will appear in the VS Code Terminal panel.
 
@@ -61,7 +61,7 @@ To make it feel like a native feature, add a keyboard shortcut:
 {
     "key": "ctrl+alt+r",
     "command": "workbench.action.tasks.runTask",
-    "args": "Gemini: Review Selected Code"
+    "args": "Local Code Reviewer"
 }
 ```
 

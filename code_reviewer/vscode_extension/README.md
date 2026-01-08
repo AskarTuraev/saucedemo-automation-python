@@ -10,7 +10,7 @@ Since this is a local extension, you need to load it into VS Code manually.
 1. Open this folder (`code_reviewer/vscode_extension`) in VS Code.
 2. Press `F5` to launch a new Extension Development Host window.
 3. Open your project in that new window.
-4. Select code -> Right Click -> **Gemini: Review Selection**.
+4. Select code -> Right Click -> **Local Code Reviewer**.
 
 ### Option 2: Package and Install
 1. Ensure you have `vsce` installed: `npm install -g @vscode/vsce`

@@ -117,7 +117,7 @@ python -m pytest tests/test_e2e.py::test_login_success
 
 ### Как пользоваться:
 1.  Выделите любой фрагмент кода в редакторе VS Code.
-2.  Нажмите `Ctrl + Shift + P` и выберите задачу **"Run Task: Gemini: Review Selected Code"**.
+2.  Нажмите `Ctrl + Shift + P` и выберите задачу **"Run Task: Local Code Reviewer"**.
 3.  (Рекомендуется) Добавьте горячую клавишу `Ctrl + Alt + R` (инструкция в `code_reviewer/README.md`).
 
 Результаты анализа появятся в терминале VS Code.
