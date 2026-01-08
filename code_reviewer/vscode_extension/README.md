@@ -1,22 +1,25 @@
-# Gemini Code Reviewer - VS Code Extension
+# Local Code Reviewer - Расширение VS Code
 
-This is a local wrapper extension to run the `code_reviewer/reviewer.py` script directly from the VS Code context menu.
+Это локальное расширение-обертка для запуска скрипта `code_reviewer/reviewer.py` напрямую из контекстного меню VS Code.
 
-## Installation
+## Установка
 
-Since this is a local extension, you need to load it into VS Code manually.
+### Вариант 1: Установка из VSIX (Рекомендуется)
+Мы уже подготовили упакованный файл расширения для вас.
+1. В VS Code перейдите во вкладку **Расширения** (`Ctrl+Shift+X`).
+2. Нажмите на значок `...` (Дополнительные действия) в правом верхнем углу.
+3. Выберите **Install from VSIX...** (Установить из VSIX...).
+4. Выберите файл `code-reviewer-local.vsix`, который находится в корне проекта.
 
-### Option 1: Run in Debug Mode (Easiest)
-1. Open this folder (`code_reviewer/vscode_extension`) in VS Code.
-2. Press `F5` to launch a new Extension Development Host window.
-3. Open your project in that new window.
-4. Select code -> Right Click -> **Local Code Reviewer**.
+### Вариант 2: Ручная установка (для разработки)
+Скопируйте папку `code_reviewer/vscode_extension` в директорию расширений VS Code:
+- **Windows:** `%USERPROFILE%\.vscode\extensions\`
+- **Linux/macOS:** `~/.vscode/extensions/`
 
-### Option 2: Package and Install
-1. Ensure you have `vsce` installed: `npm install -g @vscode/vsce`
-2. Run `vsce package` in this directory to generate a `.vsix` file.
-3. In your main VS Code, go to Extensions -> `...` -> **Install from VSIX...** and select the generated file.
+## Улучшения
+- **Умный поиск путей:** Расширение теперь автоматически ищет `reviewer.py` и виртуальное окружение `venv` в корне вашего рабочего пространства, даже если вы работаете во вложенных папках.
+- **Улучшенная видимость:** Команда теперь находится в группе `1_modification` контекстного меню для быстрого доступа.
 
-## Requirements
-- Python installed and available in your PATH or in a `venv` inside your project.
-- The `code_reviewer` folder must be in the root of your workspace.
+## Требования
+- Установленный Python, доступный в PATH или в `venv` внутри вашего проекта.
+- Папка `code_reviewer` должна находиться в структуре вашего проекта.

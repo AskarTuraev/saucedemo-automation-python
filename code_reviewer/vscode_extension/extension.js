@@ -24,18 +24,30 @@ function activate(context) {
         }
 
         // Paths
-        const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : path.dirname(document.uri.fsPath);
-        const scriptPath = path.join(workspaceFolder, 'code_reviewer', 'reviewer.py');
+        let workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : path.dirname(document.uri.fsPath);
+        let scriptPath = path.join(workspaceFolder, 'code_reviewer', 'reviewer.py');
         
+        // Fallback: search relative to extension directory if not found in workspace root
+        if (!fs.existsSync(scriptPath)) {
+            const extensionPath = context.extensionPath;
+            scriptPath = path.join(extensionPath, '..', 'reviewer.py');
+        }
+
         // Detect Python
         let pythonPath = 'python'; // Default fallback
         const venvPython = path.join(workspaceFolder, 'venv', 'Scripts', 'python.exe');
         if (fs.existsSync(venvPython)) {
             pythonPath = venvPython;
+        } else {
+            // Try to find venv in the root if we are in a subfolder
+            const rootVenv = path.join(workspaceFolder, '..', 'venv', 'Scripts', 'python.exe');
+            if (fs.existsSync(rootVenv)) {
+                pythonPath = rootVenv;
+            }
         }
 
         if (!fs.existsSync(scriptPath)) {
-            vscode.window.showErrorMessage(`Reviewer script not found at: ${scriptPath}`);
+            vscode.window.showErrorMessage(`Code Reviewer: Script not found at ${scriptPath}. Please ensure the extension is correctly placed in the project.`);
             return;
         }
 
