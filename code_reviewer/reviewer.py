@@ -27,7 +27,7 @@ def setup_client():
         print("Please ensure Ollama is running.")
         sys.exit(1)
 
-def get_code_snippet(file_path, start_line, end_line):
+def get_code_snippet(file_path, start_line=None, end_line=None):
     """Read the specific lines from the file."""
     try:
         if not os.path.exists(file_path):
@@ -37,10 +37,12 @@ def get_code_snippet(file_path, start_line, end_line):
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
             
-        start_idx = max(0, int(start_line) - 1)
-        end_idx = min(len(lines), int(end_line))
-        
-        snippet = "".join(lines[start_idx:end_idx])
+        if start_line is None or end_line is None:
+            snippet = "".join(lines)
+        else:
+            start_idx = max(0, int(start_line) - 1)
+            end_idx = min(len(lines), int(end_line))
+            snippet = "".join(lines[start_idx:end_idx])
         
         if not snippet.strip():
             print(f"{Fore.YELLOW}Warning: Selected text is empty.{Style.RESET_ALL}")
@@ -119,8 +121,8 @@ def analyze_code(endpoint, prompt):
 def main():
     parser = argparse.ArgumentParser(description='AI Code Reviewer (Ollama)')
     parser.add_argument('--file', required=True, help='Path to the file')
-    parser.add_argument('--start', required=True, type=int, help='Start line number')
-    parser.add_argument('--end', required=True, type=int, help='End line number')
+    parser.add_argument('--start', type=int, default=None, help='Start line number')
+    parser.add_argument('--end', type=int, default=None, help='End line number')
     
     args = parser.parse_args()
     

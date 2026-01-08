@@ -115,6 +115,7 @@ python -m pytest tests/test_e2e.py::test_login_success
 1.  Выделите любой фрагмент кода в редакторе VS Code.
 2.  Нажмите `Ctrl + Shift + P` и выберите задачу **"Run Task: Local Code Reviewer"**.
 3.  (Рекомендуется) Добавьте горячую клавишу `Ctrl + Alt + R` (инструкция в `code_reviewer/README.md`).
+4.  **Через контекстное меню (ПКМ):** После настройки (см. `code_reviewer/README.md`) можно нажать правой кнопкой на любой файл и выбрать **"Local Code Reviewer"**.
 
 Подробные инструкции по смене модели находятся в `code_reviewer/README.md`.
 
