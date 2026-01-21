@@ -1,0 +1,117 @@
+===========================================
+КОМАНДЫ ДЛЯ КОПИРОВАНИЯ В POWERSHELL
+===========================================
+
+ВАЖНО: Копируйте команды ОДНОЙ СТРОКОЙ!
+НЕ используйте \ для переноса строк в PowerShell!
+
+===========================================
+ШАГ 1: АКТИВАЦИЯ VENV
+===========================================
+
+.\venv\Scripts\Activate.ps1
+
+===========================================
+ШАГ 2: СОЗДАТЬ .env ФАЙЛ
+===========================================
+
+"OPENAI_API_KEY=sk-ваш-ключ-здесь" | Out-File -Encoding UTF8 .env
+
+Замените "sk-ваш-ключ-здесь" на ваш реальный ключ!
+Получить ключ: https://platform.openai.com/
+
+===========================================
+ШАГ 3: СОЗДАТЬ ФАЙЛ REQUIREMENTS.TXT
+===========================================
+
+@"
+Feature: User Login to SauceDemo
+As a user I want to login to the application
+So that I can access the product catalog
+
+Scenario: Successful login
+Given I am on the login page at https://www.saucedemo.com
+When I enter username 'standard_user'
+And I enter password 'secret_sauce'
+And I click the login button
+Then I should see the inventory page with products
+"@ | Out-File -Encoding UTF8 requirements.txt
+
+===========================================
+ШАГ 4: ГЕНЕРАЦИЯ ТЕСТОВ (ОДНОЙ СТРОКОЙ!)
+===========================================
+
+python -m ai_qa_pipeline.modules.code_generation.cli full requirements.txt --base-url https://www.saucedemo.com --llm openai --output generated_tests
+
+ИЛИ используйте готовый скрипт:
+
+.\quick_test.bat
+
+===========================================
+ШАГ 5: ПРОВЕРИТЬ РЕЗУЛЬТАТ
+===========================================
+
+ls generated_tests
+
+cat generated_tests\test_login_with_valid_credentials.py
+
+===========================================
+ШАГ 6: ЗАПУСТИТЬ ТЕСТЫ
+===========================================
+
+cd generated_tests
+pytest -v --headed
+cd ..
+
+===========================================
+ДОПОЛНИТЕЛЬНО: AI CODE REVIEW
+===========================================
+
+python -m ai_qa_pipeline.modules.code_review.cli full generated_tests --llm openai -o review.md
+
+cat review.md
+
+===========================================
+ДОПОЛНИТЕЛЬНО: ТЕСТ PII DETECTION
+===========================================
+
+.\test_pii.bat
+
+===========================================
+ВСЕ КОМАНДЫ СРАЗУ (КОПИРОВАТЬ ПОЛНОСТЬЮ)
+===========================================
+
+.\venv\Scripts\Activate.ps1
+"OPENAI_API_KEY=sk-ваш-ключ" | Out-File -Encoding UTF8 .env
+@"
+Feature: User Login
+User wants to login to SauceDemo
+"@ | Out-File -Encoding UTF8 requirements.txt
+python -m ai_qa_pipeline.modules.code_generation.cli full requirements.txt --base-url https://www.saucedemo.com --llm openai --output generated_tests
+cd generated_tests
+pytest -v --headed
+
+===========================================
+TROUBLESHOOTING
+===========================================
+
+Ошибка "execution policy":
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Проверить .env:
+cat .env
+
+Проверить что создалось:
+ls
+
+Переустановить зависимости:
+pip install -r requirements.txt
+
+===========================================
+ГОТОВЫЕ СКРИПТЫ (САМЫЙ ПРОСТОЙ СПОСОБ)
+===========================================
+
+.\test_pii.bat          # Тест PII (10 секунд)
+.\quick_test.bat        # Полный тест (2-3 минуты)
+
+===========================================
