@@ -1,89 +1,98 @@
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from utils.logger import setup_logger
-import allure
+"""
+Базовый класс для всех Page Objects
+Содержит общие методы для работы со страницами
+"""
+from playwright.sync_api import Page, expect
 
-logger = setup_logger("BasePage")
 
 class BasePage:
-    """
-    Базовый класс для всех Page Objects.
-    Содержит общие методы для взаимодействия с веб-страницей.
-    """
+    """Базовая страница с общими методами"""
 
-    def __init__(self, driver):
-        self.driver = driver
-        self.wait = WebDriverWait(driver, 10)  # Явное ожидание 10 секунд
+    def __init__(self, page: Page):
+        """
+        Инициализация базовой страницы
 
-    @allure.step("Открыть URL: {url}")
-    def open_url(self, url):
+        Args:
+            page: Playwright Page объект
         """
-        Открывает указанный URL.
-        :param url: Адрес страницы
-        """
-        logger.info(f"Открытие страницы: {url}")
-        self.driver.get(url)
+        self.page = page
 
-    def find_element(self, locator):
+    def navigate_to(self, url: str):
         """
-        Находит элемент на странице с ожиданием его появления.
-        :param locator: Кортеж (By.ID, "value")
-        :return: WebElement
-        """
-        try:
-            return self.wait.until(EC.visibility_of_element_located(locator))
-        except TimeoutException:
-            logger.error(f"Элемент не найден: {locator}")
-            raise
+        Переход на указанный URL
 
-    def find_elements(self, locator):
+        Args:
+            url: URL адрес страницы
         """
-        Находит список элементов на странице.
-        :param locator: Кортеж (By.ID, "value")
-        :return: List[WebElement]
-        """
-        try:
-            return self.wait.until(EC.presence_of_all_elements_located(locator))
-        except TimeoutException:
-            logger.error(f"Элементы не найдены: {locator}")
-            return []
+        self.page.goto(url)
 
-    @allure.step("Кликнуть по элементу: {locator}")
-    def click(self, locator):
+    def get_title(self) -> str:
         """
-        Кликает по элементу.
-        :param locator: Локатор элемента
-        """
-        logger.info(f"Клик по элементу: {locator}")
-        element = self.wait.until(EC.element_to_be_clickable(locator))
-        element.click()
+        Получение заголовка страницы
 
-    @allure.step("Ввести текст '{text}' в элемент: {locator}")
-    def input_text(self, locator, text):
+        Returns:
+            Заголовок страницы
         """
-        Вводит текст в поле.
-        :param locator: Локатор поля ввода
-        :param text: Текст для ввода
-        """
-        logger.info(f"Ввод текста '{text}' в элемент: {locator}")
-        element = self.find_element(locator)
-        element.clear()
-        element.send_keys(text)
+        return self.page.title()
 
-    @allure.step("Получить текст элемента: {locator}")
-    def get_text(self, locator):
+    def wait_for_url(self, url: str, timeout: int = 30000):
         """
-        Получает текст элемента.
-        :param locator: Локатор элемента
-        :return: Текст элемента (str)
-        """
-        element = self.find_element(locator)
-        text = element.text
-        logger.info(f"Получен текст '{text}' из элемента: {locator}")
-        return text
+        Ожидание загрузки определенного URL
 
-    @allure.step("Получить текущий URL")
-    def get_current_url(self):
-        """Возвращает текущий URL страницы"""
-        return self.driver.current_url
+        Args:
+            url: URL для ожидания
+            timeout: Таймаут ожидания в миллисекундах
+        """
+        self.page.wait_for_url(url, timeout=timeout)
+
+    def click(self, selector: str):
+        """
+        Клик по элементу
+
+        Args:
+            selector: CSS селектор элемента
+        """
+        self.page.click(selector)
+
+    def fill(self, selector: str, text: str):
+        """
+        Заполнение текстового поля
+
+        Args:
+            selector: CSS селектор элемента
+            text: Текст для ввода
+        """
+        self.page.fill(selector, text)
+
+    def is_visible(self, selector: str) -> bool:
+        """
+        Проверка видимости элемента
+
+        Args:
+            selector: CSS селектор элемента
+
+        Returns:
+            True если элемент видим, иначе False
+        """
+        return self.page.is_visible(selector)
+
+    def get_text(self, selector: str) -> str:
+        """
+        Получение текста элемента
+
+        Args:
+            selector: CSS селектор элемента
+
+        Returns:
+            Текст элемента
+        """
+        return self.page.locator(selector).inner_text()
+
+    def inject_visual_defect(self, script: str):
+        """
+        Внедрение JavaScript кода для создания визуального дефекта
+
+        Args:
+            script: JavaScript код для выполнения
+        """
+        self.page.evaluate(script)

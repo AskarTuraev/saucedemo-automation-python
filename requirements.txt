@@ -1,4 +1,11 @@
-pytest
-selenium
-webdriver-manager
-allure-pytest
+# Основные зависимости для автоматизации тестирования с Playwright
+pytest==7.4.3
+pytest-playwright==0.4.3
+playwright==1.40.0
+pytest-html==4.1.1
+
+# Applitools Eyes SDK для Playwright
+eyes-playwright==1.6.0
+
+# Дополнительные утилиты
+python-dotenv==1.0.0

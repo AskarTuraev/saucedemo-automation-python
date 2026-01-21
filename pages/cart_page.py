@@ -1,40 +1,97 @@
-from selenium.webdriver.common.by import By
+"""
+Page Object для страницы корзины SauceDemo
+"""
+from playwright.sync_api import Page
 from pages.base_page import BasePage
-import allure
+
 
 class CartPage(BasePage):
-    """
-    Класс страницы корзины.
-    """
+    """Страница корзины"""
 
-    # Локаторы
-    _CART_ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
-    _CHECKOUT_BUTTON = (By.ID, "checkout")
-    _REMOVE_BACKPACK = (By.ID, "remove-sauce-labs-backpack")
+    # Локаторы элементов страницы корзины
+    CART_CONTAINER = '.cart_contents_container'
+    CART_ITEM = '.cart_item'
+    CART_ITEM_NAME = '.inventory_item_name'
+    CART_ITEM_PRICE = '.inventory_item_price'
+    CHECKOUT_BUTTON = '[data-test="checkout"]'
+    CONTINUE_SHOPPING_BUTTON = '[data-test="continue-shopping"]'
+    REMOVE_BUTTON = '[data-test^="remove"]'
+    CART_QUANTITY = '.cart_quantity'
 
-    @allure.step("Проверить наличие товара в корзине: {product_name}")
-    def is_product_in_cart(self, product_name):
+    def __init__(self, page: Page):
         """
-        Проверяет, есть ли товар с заданным именем в корзине.
-        :param product_name: Название товара
-        :return: True, если товар найден
-        """
-        items = self.find_elements(self._CART_ITEM_NAME)
-        for item in items:
-            if item.text == product_name:
-                return True
-        return False
+        Инициализация страницы корзины
 
-    @allure.step("Удалить рюкзак из корзины")
-    def remove_backpack(self):
+        Args:
+            page: Playwright Page объект
         """
-        Удаляет рюкзак из корзины (если он там есть).
-        """
-        self.click(self._REMOVE_BACKPACK)
+        super().__init__(page)
+        self.url = 'https://www.saucedemo.com/cart.html'
 
-    @allure.step("Нажать кнопку Checkout")
-    def click_checkout(self):
+    def is_page_loaded(self) -> bool:
         """
-        Переход к оформлению заказа.
+        Проверка загрузки страницы корзины
+
+        Returns:
+            True если страница загружена
         """
-        self.click(self._CHECKOUT_BUTTON)
+        return self.is_visible(self.CART_CONTAINER)
+
+    def get_cart_items_count(self) -> int:
+        """
+        Получение количества товаров в корзине
+
+        Returns:
+            Количество товаров в корзине
+        """
+        return self.page.locator(self.CART_ITEM).count()
+
+    def proceed_to_checkout(self):
+        """Переход к оформлению заказа"""
+        self.click(self.CHECKOUT_BUTTON)
+
+    def continue_shopping(self):
+        """Возврат к покупкам"""
+        self.click(self.CONTINUE_SHOPPING_BUTTON)
+
+    def get_item_names(self) -> list:
+        """
+        Получение списка названий товаров в корзине
+
+        Returns:
+            Список названий товаров
+        """
+        items = self.page.locator(self.CART_ITEM_NAME).all()
+        return [item.inner_text() for item in items]
+
+    def remove_item(self, index: int = 0):
+        """
+        Удаление товара из корзины по индексу
+
+        Args:
+            index: Индекс товара (по умолчанию 0 - первый товар)
+        """
+        remove_buttons = self.page.locator(self.REMOVE_BUTTON).all()
+        if index < len(remove_buttons):
+            remove_buttons[index].click()
+
+    def inject_cart_visual_defects(self):
+        """
+        Внедрение визуальных дефектов на странице корзины
+        Дефект 3: Изменение цвета кнопки Checkout и нарушение layout
+        """
+        defect_script = """
+        // Изменяем цвет кнопки Checkout на зеленый
+        var checkoutBtn = document.querySelector('[data-test="checkout"]');
+        if (checkoutBtn) {
+            checkoutBtn.style.backgroundColor = '#00ff00';
+            checkoutBtn.style.color = '#000000';
+        }
+
+        // Нарушаем layout - смещаем контейнер корзины
+        var cartContainer = document.querySelector('.cart_contents_container');
+        if (cartContainer) {
+            cartContainer.style.marginLeft = '100px';
+        }
+        """
+        self.inject_visual_defect(defect_script)
