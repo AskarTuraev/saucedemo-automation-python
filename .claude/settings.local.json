@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Playwright + Applitools Eyes integration for visual testing\n\n- Migrate from Selenium to Playwright for modern browser automation\n- Integrate Applitools Eyes SDK for visual regression testing\n- Implement complete Page Object Model for all pages \\(Login, Inventory, Cart, Checkout\\)\n- Add baseline test for creating visual checkpoints\n- Add visual defects test with 4 different UI bugs injection\n- Create comprehensive documentation \\(README.md, QUICKSTART.md\\)\n- Add configuration management with .env support\n- Setup pytest fixtures for Eyes integration\n\nFeatures:\n- Full E2E test covering login → catalog → cart → checkout flow\n- 4 visual checkpoints: Login, Inventory, Cart, Checkout pages\n- Visual defects: hidden button, color changes, layout shifts, missing elements\n- Production-ready test framework with detailed logging and reporting\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(C:/Users/UserAsk/AppData/Local/Microsoft/WindowsApps/PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0/python.exe -m playwright install chromium)",
+      "Bash(./venv/Scripts/python.exe:*)"
     ]
   }
 }

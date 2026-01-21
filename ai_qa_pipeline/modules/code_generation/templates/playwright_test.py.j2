@@ -1,0 +1,72 @@
+"""
+{{ contract.test_name }}
+
+{{ contract.description }}
+
+Priority: {{ contract.priority }}
+Type: {{ contract.test_type }}
+Tags: {{ contract.tags | join(', ') }}
+"""
+
+import pytest
+from playwright.sync_api import Page, expect
+
+
+@pytest.mark.{{ contract.test_type }}
+@pytest.mark.priority_{{ contract.priority }}
+{% for tag in contract.tags -%}
+@pytest.mark.{{ tag }}
+{% endfor -%}
+def {{ contract.test_id }}(page: Page):
+    """
+    {{ contract.description }}
+
+    Preconditions:
+{% for precondition in contract.preconditions %}
+    - {{ precondition }}
+{% endfor %}
+    """
+
+    # ========================================
+    # Test Steps
+    # ========================================
+
+{% for action in contract.actions %}
+    # Step {{ loop.index }}: {{ action.description }}
+{% if action.type == "navigate" %}
+    page.goto("{{ action.value }}", timeout={{ action.timeout }})
+{% elif action.type == "click" %}
+    page.locator({{ action.locator | to_locator }}).click(timeout={{ action.timeout }})
+{% elif action.type == "fill" %}
+    page.locator({{ action.locator | to_locator }}).fill("{{ action.value }}", timeout={{ action.timeout }})
+{% elif action.type == "select" %}
+    page.locator({{ action.locator | to_locator }}).select_option("{{ action.value }}", timeout={{ action.timeout }})
+{% elif action.type == "wait" %}
+    page.wait_for_timeout({{ action.value }})
+{% elif action.type == "assert" %}
+    expect(page.locator({{ action.locator | to_locator }})).to_be_visible(timeout={{ action.timeout }})
+{% elif action.type == "api_call" %}
+    # API Call: {{ action.value }}
+    response = page.request.{{ action.value.get('method', 'GET').lower() }}("{{ action.value.get('url', '') }}")
+    expect(response).to_be_ok()
+{% elif action.type == "screenshot" %}
+    page.screenshot(path="{{ contract.test_id }}_step_{{ loop.index }}.png")
+{% elif action.type == "execute_script" %}
+    page.evaluate("{{ action.value }}")
+{% endif %}
+{% if action.expected_result %}
+    # Expected: {{ action.expected_result }}
+{% endif %}
+{% if action.screenshot %}
+    page.screenshot(path="{{ contract.test_id }}_step_{{ loop.index }}.png")
+{% endif %}
+
+{% endfor %}
+
+    # ========================================
+    # Postconditions
+    # ========================================
+
+{% for postcondition in contract.postconditions %}
+    # {{ postcondition }}
+{% endfor %}

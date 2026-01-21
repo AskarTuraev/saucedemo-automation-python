@@ -1,0 +1,107 @@
+"""
+{{ page_name|title }} Page Object Model
+
+Auto-generated from JSON contract
+"""
+
+from typing import Optional
+from playwright.sync_api import Page, Locator, expect
+
+
+class {{ page_name|title|replace(' ', '')|replace('_', '') }}Page:
+    """
+    Page Object for {{ page_name }}
+
+{% if base_url %}
+    URL: {{ base_url }}
+{% endif %}
+    """
+
+    def __init__(self, page: Page):
+        """
+        Initialize {{ page_name }} page
+
+        Args:
+            page: Playwright Page instance
+        """
+        self.page = page
+{% if base_url %}
+        self.url = "{{ base_url }}"
+{% endif %}
+
+        # Locators
+{% for element_name, locator in locators.items() %}
+        self._{{ element_name }}_locator = "{{ locator }}"
+{% endfor %}
+
+{% if base_url %}
+    def navigate(self, timeout: int = 30000):
+        """
+        Navigate to {{ page_name }} page
+
+        Args:
+            timeout: Navigation timeout in milliseconds
+        """
+        self.page.goto(self.url, timeout=timeout)
+        self.page.wait_for_load_state("networkidle")
+{% endif %}
+
+    # ========================================
+    # Element Getters
+    # ========================================
+
+{% for element_name, locator in locators.items() %}
+    def get_{{ element_name }}(self) -> Locator:
+        """Get {{ element_name }} element"""
+        return self.page.locator(self._{{ element_name }}_locator)
+{% endfor %}
+
+    # ========================================
+    # Actions
+    # ========================================
+
+{% for element_name, locator in locators.items() %}
+    def click_{{ element_name }}(self, timeout: int = 30000):
+        """
+        Click {{ element_name }}
+
+        Args:
+            timeout: Click timeout in milliseconds
+        """
+        self.get_{{ element_name }}().click(timeout=timeout)
+
+{% if 'input' in element_name or 'field' in element_name %}
+    def fill_{{ element_name }}(self, value: str, timeout: int = 30000):
+        """
+        Fill {{ element_name }} with value
+
+        Args:
+            value: Text to fill
+            timeout: Fill timeout in milliseconds
+        """
+        self.get_{{ element_name }}().fill(value, timeout=timeout)
+{% endif %}
+
+{% endfor %}
+
+    # ========================================
+    # Assertions
+    # ========================================
+
+{% for element_name, locator in locators.items() %}
+    def assert_{{ element_name }}_visible(self, timeout: int = 30000):
+        """Assert that {{ element_name }} is visible"""
+        expect(self.get_{{ element_name }}()).to_be_visible(timeout=timeout)
+{% endfor %}
+
+    def is_loaded(self) -> bool:
+        """Check if page is loaded"""
+        try:
+{% for element_name, locator in locators.items() %}
+{% if loop.first %}
+            self.assert_{{ element_name }}_visible(timeout=5000)
+{% endif %}
+{% endfor %}
+            return True
+        except Exception:
+            return False
