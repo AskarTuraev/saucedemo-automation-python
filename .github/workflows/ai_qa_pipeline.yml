@@ -1,0 +1,314 @@
+name: AI-Driven QA Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      requirements_file:
+        description: 'Path to requirements file'
+        required: false
+        default: 'requirements.txt'
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '18'
+
+jobs:
+  # ========================================
+  # Stage 1: PII Detection
+  # ========================================
+  pii-detection:
+    name: PII Detection & Sanitization
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install presidio-analyzer presidio-anonymizer spacy
+          python -m spacy download en_core_web_sm
+
+      - name: Run PII Detection
+        run: |
+          python -m ai_qa_pipeline.modules.pii_detection.cli \
+            requirements.txt \
+            -f \
+            -o requirements_safe.txt \
+            -s fake \
+            --report
+
+      - name: Upload sanitized requirements
+        uses: actions/upload-artifact@v3
+        with:
+          name: sanitized-requirements
+          path: requirements_safe.txt
+
+  # ========================================
+  # Stage 2-4: Test Generation & Code Gen
+  # ========================================
+  generate-tests:
+    name: Generate Tests from Requirements
+    needs: pii-detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Download sanitized requirements
+        uses: actions/download-artifact@v3
+        with:
+          name: sanitized-requirements
+
+      - name: Generate tests (full pipeline)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m ai_qa_pipeline.modules.code_generation.cli full \
+            requirements_safe.txt \
+            --base-url https://www.saucedemo.com \
+            --llm openai \
+            --output generated_tests
+
+      - name: Upload generated tests
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-tests
+          path: generated_tests/
+
+  # ========================================
+  # Stage 5-6: Code Quality & AI Review
+  # ========================================
+  code-review:
+    name: Code Review (Static + AI)
+    needs: generate-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linting tools
+        run: |
+          pip install pylint flake8 mypy bandit
+
+      - name: Download generated tests
+        uses: actions/download-artifact@v3
+        with:
+          name: generated-tests
+          path: generated_tests/
+
+      - name: Run static analysis
+        continue-on-error: true
+        run: |
+          python -m ai_qa_pipeline.modules.code_review.cli lint \
+            generated_tests/ \
+            -o lint-report.json
+
+      - name: Run AI code review
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m ai_qa_pipeline.modules.code_review.cli ai-review \
+            generated_tests/ \
+            --llm openai \
+            --format markdown \
+            -o ai-review.md
+
+      - name: Upload review reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-review-reports
+          path: |
+            lint-report.json
+            ai-review.md
+
+  # ========================================
+  # Stage 7: Test Execution
+  # ========================================
+  run-tests:
+    name: Execute Generated Tests
+    needs: code-review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Download generated tests
+        uses: actions/download-artifact@v3
+        with:
+          name: generated-tests
+          path: generated_tests/
+
+      - name: Run tests
+        continue-on-error: true
+        run: |
+          cd generated_tests
+          pytest -v \
+            --tb=short \
+            -n4 \
+            --alluredir=allure-results \
+            --json-report \
+            --json-report-file=test-results.json \
+            --headed=false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            generated_tests/test-results.json
+            generated_tests/allure-results/
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: failure-screenshots
+          path: generated_tests/screenshots/
+
+  # ========================================
+  # Stage 8: Generate Reports
+  # ========================================
+  generate-reports:
+    name: Generate Allure Report
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: Generate Allure Report
+        uses: simple-elf/allure-report-action@master
+        with:
+          allure_results: test-results/allure-results
+          allure_report: allure-report
+          gh_pages: gh-pages
+          allure_history: allure-history
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+
+  # ========================================
+  # Stage 9-10: AI Analysis & Bug Reports
+  # ========================================
+  analyze-failures:
+    name: AI Failure Analysis & Bug Reports
+    needs: run-tests
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: AI Log Analysis
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m ai_qa_pipeline.modules.log_analysis.cli \
+            test-results/test-results.json \
+            -o failure-analysis.md
+
+      - name: Generate Bug Reports
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m ai_qa_pipeline.modules.bug_reporting.cli \
+            test-results/test-results.json \
+            -o bug-reports/ \
+            --format markdown
+
+      - name: Upload analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: failure-analysis
+          path: |
+            failure-analysis.md
+            bug-reports/
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const analysis = fs.readFileSync('failure-analysis.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🤖 AI Failure Analysis\n\n${analysis}`
+            });
+
+  # ========================================
+  # Summary Job
+  # ========================================
+  pipeline-summary:
+    name: Pipeline Summary
+    needs: [pii-detection, generate-tests, code-review, run-tests, generate-reports]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# AI-Driven QA Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ PII Detection: ${{ needs.pii-detection.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Test Generation: ${{ needs.generate-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Code Review: ${{ needs.code-review.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Test Execution: ${{ needs.run-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Report Generation: ${{ needs.generate-reports.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }})" >> $GITHUB_STEP_SUMMARY
