@@ -40,6 +40,8 @@
 ## 🚀 Quick Start
 
 > **Самый быстрый способ:** [QUICKSTART_RU.md](QUICKSTART_RU.md) или просто запустите `setup.bat`
+>
+> **PowerShell пользователи:** См. [POWERSHELL_GUIDE.md](POWERSHELL_GUIDE.md) для правильного синтаксиса команд
 
 ### Установка
 
@@ -49,12 +51,17 @@ git clone https://github.com/AskarTuraev/saucedemo-automation-python.git
 cd saucedemo_automation
 
 # 2. Автоматическая установка (Windows)
-setup.bat
+.\setup.bat
 
 # ИЛИ Вручную:
 # Создать виртуальное окружение
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Windows PowerShell:
+.\venv\Scripts\Activate.ps1
+
+# Linux/Mac:
+source venv/bin/activate
 
 # 3. Установить зависимости
 pip install -r requirements.txt
@@ -66,8 +73,11 @@ playwright install chromium
 python -m spacy download en_core_web_sm
 
 # 6. Настроить .env файл
-cp .env.example .env
-# Добавьте OPENAI_API_KEY и APPLITOOLS_API_KEY
+# PowerShell:
+"OPENAI_API_KEY=sk-your-key" | Out-File -Encoding UTF8 .env
+
+# Linux/Mac:
+echo "OPENAI_API_KEY=sk-your-key" > .env
 ```
 
 ---
@@ -80,11 +90,11 @@ cp .env.example .env
 
 ```bash
 # Полный пайплайн: Requirements → Tests
-python -m ai_qa_pipeline.modules.code_generation.cli full \
-    requirements.txt \
-    --base-url https://www.saucedemo.com \
-    --llm openai \
-    --output generated_tests
+# ВАЖНО для PowerShell: команда ОДНОЙ СТРОКОЙ (без \)
+python -m ai_qa_pipeline.modules.code_generation.cli full requirements.txt --base-url https://www.saucedemo.com --llm openai --output generated_tests
+
+# ИЛИ используйте готовый скрипт:
+.\quick_test.bat
 
 # Результат:
 # ✓ PII sanitized

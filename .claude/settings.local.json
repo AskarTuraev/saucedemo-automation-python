@@ -8,7 +8,9 @@
       "Bash(python:*)",
       "Bash(pip install:*)",
       "Bash(C:/Users/UserAsk/AppData/Local/Microsoft/WindowsApps/PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0/python.exe -m playwright install chromium)",
-      "Bash(./venv/Scripts/python.exe:*)"
+      "Bash(./venv/Scripts/python.exe:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)"
     ]
   }
 }
