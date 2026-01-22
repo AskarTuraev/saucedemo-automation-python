@@ -15,7 +15,7 @@ from playwright.sync_api import Page, expect
 @pytest.mark.{{ contract.test_type }}
 @pytest.mark.priority_{{ contract.priority }}
 {% for tag in contract.tags -%}
-@pytest.mark.{{ tag }}
+@pytest.mark.{{ tag | replace(' ', '_') | replace('-', '_') | lower }}
 {% endfor -%}
 def {{ contract.test_id }}(page: Page):
     """
