@@ -35,6 +35,7 @@ def main():
     full_parser.add_argument("requirements", help="Business requirements file")
     full_parser.add_argument("-o", "--output", default="generated_tests", help="Output directory")
     full_parser.add_argument("--llm", choices=["openai", "anthropic", "ollama"], default="openai")
+    full_parser.add_argument("--model", help="Specific model name (e.g., llama2, gpt-4)")
     full_parser.add_argument("--api-key", help="LLM API key")
     full_parser.add_argument("--base-url", required=True, help="Base URL of application")
 
@@ -122,6 +123,7 @@ def main():
             print("[2/4] Generating test scenarios with LLM...")
             scenario_gen = TestScenarioGenerator(
                 llm_provider=LLMProvider[args.llm.upper()],
+                model=args.model,
                 api_key=args.api_key
             )
             scenarios = scenario_gen.generate_from_requirements(requirements)
