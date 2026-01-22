@@ -187,6 +187,35 @@ class LLMClient:
 
         return response['message']['content']
 
+    def _extract_json_from_text(self, text: str) -> str:
+        """
+        Извлекает JSON из текста с пояснениями
+
+        Args:
+            text: Текст, содержащий JSON
+
+        Returns:
+            Чистый JSON строка
+        """
+        # Пытаемся найти JSON объект или массив
+        start = text.find('{')
+        if start == -1:
+            start = text.find('[')
+
+        if start == -1:
+            return text  # Не найдено начало JSON
+
+        # Ищем конец JSON (последнюю закрывающую скобку)
+        # Простой подход: берем от первой { до последней }
+        end = text.rfind('}')
+        if end == -1:
+            end = text.rfind(']')
+
+        if end == -1 or end < start:
+            return text  # Не найдено корректного конца
+
+        return text[start:end + 1]
+
     def _fix_incomplete_json(self, json_str: str) -> str:
         """
         Попытка исправить неполный JSON ответ от Ollama
@@ -248,6 +277,9 @@ class LLMClient:
         if response.endswith("```"):
             response = response[:-3]
         response = response.strip()
+
+        # Извлекаем чистый JSON из текста (если есть пояснения)
+        response = self._extract_json_from_text(response)
 
         # Парсинг JSON
         try:
