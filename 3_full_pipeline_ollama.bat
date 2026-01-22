@@ -50,14 +50,7 @@ echo.
 
 REM Check model
 echo [2/9] Checking llama2 model...
-ollama list | find "llama2" >nul 2>&1
-if errorlevel 1 (
-    echo.
-    echo WARNING: Model llama2 not found
-    echo Downloading model (~4GB, may take 5-10 minutes)...
-    ollama pull llama2
-)
-echo OK: Model llama2 is ready
+echo OK: Skipping model check (will download if needed)
 echo.
 
 REM Activate venv
