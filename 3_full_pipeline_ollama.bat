@@ -1,87 +1,77 @@
 @echo off
-chcp 65001 >nul
 REM ========================================================================
-REM ПОЛНЫЙ ЦИКЛ: Генерация + Запуск + Отчеты (Ollama)
-REM ========================================================================
-REM
-REM Этот скрипт выполняет полный цикл:
-REM 1. Генерирует тесты с помощью AI (Ollama)
-REM 2. Запускает сгенерированные тесты
-REM 3. Создает HTML и Allure отчеты
-REM 4. Автоматически открывает отчеты
-REM
-REM Удобно для демонстрации возможностей AI-тестирования!
+REM FULL PIPELINE: Generate + Run + Reports (Ollama)
 REM ========================================================================
 
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║  ПОЛНЫЙ ЦИКЛ AI-ТЕСТИРОВАНИЯ (OLLAMA - БЕСПЛАТНО)           ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ====================================================================
+echo   FULL AI TESTING PIPELINE (OLLAMA - FREE)
+echo ====================================================================
 echo.
-echo Этот скрипт выполнит:
-echo   1. Генерацию тестов с AI (5-10 минут)
-echo   2. Запуск тестов
-echo   3. Создание отчетов
-echo   4. Открытие отчетов в браузере
+echo This script will:
+echo   1. Generate tests with AI (5-10 minutes)
+echo   2. Run tests
+echo   3. Create reports
+echo   4. Open reports in browser
 echo.
-echo Общее время: 10-15 минут
+echo Total time: 10-15 minutes
 echo.
 pause
 
 REM ========================================
-REM ШАГ 1: Генерация тестов
+REM STAGE 1: Generate Tests
 REM ========================================
 
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║  ЭТАП 1/2: ГЕНЕРАЦИЯ ТЕСТОВ                                 ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ====================================================================
+echo   STAGE 1/2: TEST GENERATION
+echo ====================================================================
 echo.
 
-REM Проверка Ollama
-echo [1/9] Проверка установки Ollama...
+REM Check Ollama
+echo [1/9] Checking Ollama installation...
 ollama --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
-    echo ✖ ОШИБКА: Ollama не найдена!
+    echo ERROR: Ollama not found!
     echo.
-    echo Установите Ollama:
-    echo 1. Скачайте: https://ollama.ai/download
-    echo 2. Установите OllamaSetup.exe
-    echo 3. Запустите: ollama pull llama2
+    echo Please install Ollama:
+    echo 1. Download: https://ollama.ai/download
+    echo 2. Install OllamaSetup.exe
+    echo 3. Run: ollama pull llama2
     echo.
     pause
     exit /b 1
 )
-echo ✓ Ollama установлена
+echo OK: Ollama is installed
 echo.
 
-REM Проверка модели
-echo [2/9] Проверка модели llama2...
+REM Check model
+echo [2/9] Checking llama2 model...
 ollama list | findstr llama2 >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
-    echo ⚠ Модель llama2 не найдена
-    echo Загружаем модель (~4GB, это может занять 5-10 минут)...
+    echo WARNING: Model llama2 not found
+    echo Downloading model (~4GB, may take 5-10 minutes)...
     ollama pull llama2
 )
-echo ✓ Модель llama2 готова
+echo OK: Model llama2 is ready
 echo.
 
-REM Активация виртуального окружения
-echo [3/9] Активация виртуального окружения...
+REM Activate venv
+echo [3/9] Activating virtual environment...
 if not exist "venv\Scripts\activate.bat" (
-    echo ✖ ОШИБКА: Виртуальное окружение не найдено!
-    echo Запустите сначала: setup.bat
+    echo ERROR: Virtual environment not found!
+    echo Please run: setup.bat
     pause
     exit /b 1
 )
 call venv\Scripts\activate
-echo ✓ Виртуальное окружение активировано
+echo OK: Virtual environment activated
 echo.
 
-REM Создание требований
-echo [4/9] Создание файла требований...
+REM Create requirements
+echo [4/9] Creating requirements file...
 (
 echo Feature: SauceDemo Login
 echo As a user I want to login to SauceDemo
@@ -94,57 +84,57 @@ echo And I enter password 'secret_sauce'
 echo And I click login button
 echo Then I should see the inventory page
 ) > quick_requirements.txt
-echo ✓ Требования созданы
+echo OK: Requirements created
 echo.
 
-REM Удаление старых тестов
+REM Remove old tests
 if exist "ai_generated_tests" (
-    echo [5/9] Удаление старых сгенерированных тестов...
+    echo [5/9] Removing old generated tests...
     rmdir /s /q "ai_generated_tests"
-    echo ✓ Старые тесты удалены
+    echo OK: Old tests removed
     echo.
 )
 
-REM Генерация тестов
-echo [5/9] Генерация автотестов с помощью AI...
-echo ⏳ Это займет 5-10 минут (Ollama медленнее OpenAI, но БЕСПЛАТНО)
+REM Generate tests
+echo [5/9] Generating autotests with AI...
+echo NOTE: This may take 5-10 minutes (Ollama is slower but FREE)
 echo.
 python -m ai_qa_pipeline.modules.code_generation.cli full quick_requirements.txt --base-url https://www.saucedemo.com --llm ollama --model llama2 --output ai_generated_tests
 
-REM Проверка результата
+REM Check result
 if not exist "ai_generated_tests" (
     echo.
-    echo ✖ ОШИБКА: Генерация тестов не удалась!
+    echo ERROR: Test generation failed!
     pause
     exit /b 1
 )
 
 echo.
-echo ✓ Тесты успешно сгенерированы!
+echo OK: Tests generated successfully!
 echo.
 
 REM ========================================
-REM ШАГ 2: Запуск тестов и отчеты
+REM STAGE 2: Run Tests and Reports
 REM ========================================
 
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║  ЭТАП 2/2: ЗАПУСК ТЕСТОВ И ГЕНЕРАЦИЯ ОТЧЕТОВ                ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ====================================================================
+echo   STAGE 2/2: RUN TESTS AND GENERATE REPORTS
+echo ====================================================================
 echo.
 
-REM Проверка зависимостей
-echo [6/9] Проверка зависимостей...
+REM Check dependencies
+echo [6/9] Checking dependencies...
 pip show allure-pytest >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Установка allure-pytest...
+    echo Installing allure-pytest...
     pip install allure-pytest
 )
-echo ✓ Все зависимости установлены
+echo OK: All dependencies installed
 echo.
 
-REM Очистка старых отчетов
-echo [7/9] Очистка старых отчетов...
+REM Clean old reports
+echo [7/9] Cleaning old reports...
 if exist "reports\allure-results" (
     rmdir /s /q "reports\allure-results"
 )
@@ -152,78 +142,78 @@ if exist "reports\allure-report" (
     rmdir /s /q "reports\allure-report"
 )
 mkdir "reports\allure-results" 2>nul
-echo ✓ Старые отчеты очищены
+echo OK: Old reports cleaned
 echo.
 
-REM Запуск тестов
-echo [8/9] Запуск AI-сгенерированных тестов...
-echo ⏳ Это может занять несколько минут...
+REM Run tests
+echo [8/9] Running AI-generated tests...
+echo NOTE: This may take a few minutes...
 echo.
 pytest ai_generated_tests -v --headed --html=reports/report.html --self-contained-html --alluredir=reports/allure-results
 
 if %errorlevel% neq 0 (
     echo.
-    echo ⚠ Внимание: Некоторые тесты завершились с ошибками
-    echo Отчеты все равно будут сгенерированы
+    echo WARNING: Some tests failed
+    echo Reports will be generated anyway
     echo.
 )
 
-REM Генерация Allure отчета
+REM Generate Allure report
 echo.
-echo [9/9] Генерация Allure отчета...
+echo [9/9] Generating Allure report...
 where allure >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
-    echo ⚠ Внимание: Allure CLI не установлен
-    echo HTML отчет будет доступен, но Allure отчет пропущен
+    echo WARNING: Allure CLI not installed
+    echo HTML report will be available, but Allure report skipped
     echo.
     goto :open_html
 )
 
 allure generate reports/allure-results -o reports/allure-report --clean
 if %errorlevel% neq 0 (
-    echo ✖ Не удалось сгенерировать Allure отчет
+    echo ERROR: Failed to generate Allure report
     goto :open_html
 )
-echo ✓ Allure отчет сгенерирован
+echo OK: Allure report generated
 echo.
 
-REM Открытие отчетов
+REM Open reports
 :open_html
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║  ПОЛНЫЙ ЦИКЛ ЗАВЕРШЕН! ОТКРЫВАЕМ ОТЧЕТЫ                     ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ====================================================================
+echo   FULL PIPELINE COMPLETE! OPENING REPORTS
+echo ====================================================================
 echo.
 
-echo Открываем HTML отчет...
+echo Opening HTML report...
 start "" "%CD%\reports\report.html"
 
 timeout /t 2 /nobreak >nul
 
 if exist "reports\allure-report\index.html" (
-    echo Открываем Allure отчет...
+    echo Opening Allure report...
     start "" "%CD%\reports\allure-report\index.html"
     echo.
-    echo ✓ Оба отчета открыты в браузере!
+    echo OK: Both reports opened in browser!
 ) else (
-    echo ✓ HTML отчет открыт в браузере!
+    echo OK: HTML report opened in browser!
 )
 
 echo.
-echo ════════════════════════════════════════════════════════════════
-echo ИТОГИ:
-echo   ✓ Тесты сгенерированы: ai_generated_tests\
-echo   ✓ Тесты выполнены
-echo   ✓ Отчеты созданы:
+echo ====================================================================
+echo SUMMARY:
+echo   OK: Tests generated: ai_generated_tests\
+echo   OK: Tests executed
+echo   OK: Reports created:
 echo     - HTML:   reports\report.html
 if exist "reports\allure-report\index.html" (
     echo     - Allure: reports\allure-report\index.html
 )
-echo ════════════════════════════════════════════════════════════════
+echo ====================================================================
 echo.
-echo Для повторного запуска используйте:
-echo   - Только генерация: 1_generate_tests_ollama.bat
-echo   - Только тесты:     2_run_tests_with_reports.bat
+echo To run again:
+echo   - Generate only: 1_generate_tests_ollama.bat
+echo   - Run only:      2_run_tests_with_reports.bat
 echo.
 pause

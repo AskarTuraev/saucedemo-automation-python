@@ -1,47 +1,38 @@
 @echo off
-chcp 65001 >nul
 REM ========================================================================
-REM ШАГ 2: Запуск тестов с автоматическими отчетами
-REM ========================================================================
-REM
-REM Этот скрипт:
-REM 1. Запускает все тесты (из tests/ или ai_generated_tests/)
-REM 2. Генерирует HTML отчет и Allure отчет
-REM 3. Автоматически открывает отчеты в браузере
-REM
-REM Используйте после: 1_generate_tests_ollama.bat
+REM STEP 2: Run Tests with Automatic Reports
 REM ========================================================================
 
 echo.
-echo ╔════════════════════════════════════════════════════════════╗
-echo ║  ШАГ 2: ЗАПУСК ТЕСТОВ И ГЕНЕРАЦИЯ ОТЧЕТОВ                 ║
-echo ╚════════════════════════════════════════════════════════════╝
+echo ====================================================================
+echo   STEP 2: RUN TESTS AND GENERATE REPORTS
+echo ====================================================================
 echo.
 
-REM Активация виртуального окружения
-echo [1/5] Активация виртуального окружения...
+REM Activate venv
+echo [1/5] Activating virtual environment...
 if not exist "venv\Scripts\activate.bat" (
-    echo ✖ ОШИБКА: Виртуальное окружение не найдено!
-    echo Запустите сначала: setup.bat
+    echo ERROR: Virtual environment not found!
+    echo Please run: setup.bat
     pause
     exit /b 1
 )
 call venv\Scripts\activate
-echo ✓ Виртуальное окружение активировано
+echo OK: Virtual environment activated
 echo.
 
-REM Установка allure-pytest если нужно
-echo [2/5] Проверка зависимостей...
+REM Install allure-pytest if needed
+echo [2/5] Checking dependencies...
 pip show allure-pytest >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Установка allure-pytest...
+    echo Installing allure-pytest...
     pip install allure-pytest
 )
-echo ✓ Все зависимости установлены
+echo OK: All dependencies installed
 echo.
 
-REM Очистка старых отчетов
-echo [3/5] Очистка старых отчетов...
+REM Clean old reports
+echo [3/5] Cleaning old reports...
 if exist "reports\allure-results" (
     rmdir /s /q "reports\allure-results"
 )
@@ -49,85 +40,85 @@ if exist "reports\allure-report" (
     rmdir /s /q "reports\allure-report"
 )
 mkdir "reports\allure-results" 2>nul
-echo ✓ Старые отчеты очищены
+echo OK: Old reports cleaned
 echo.
 
-REM Определение папки с тестами
+REM Determine test directory
 set TEST_DIR=tests
 if exist "ai_generated_tests" (
-    set /p USE_AI="Обнаружена папка ai_generated_tests. Запустить эти тесты? (y/n): "
+    set /p USE_AI="Found ai_generated_tests folder. Run these tests? (y/n): "
     if /i "%USE_AI%"=="y" set TEST_DIR=ai_generated_tests
 )
 
-REM Запуск тестов
-echo [4/5] Запуск тестов из папки: %TEST_DIR%
-echo ⏳ Это может занять несколько минут...
+REM Run tests
+echo [4/5] Running tests from folder: %TEST_DIR%
+echo NOTE: This may take a few minutes...
 echo.
 pytest %TEST_DIR% -v --headed --html=reports/report.html --self-contained-html --alluredir=reports/allure-results
 
-REM Проверка результата
+REM Check result
 if %errorlevel% neq 0 (
     echo.
-    echo ⚠ Внимание: Некоторые тесты завершились с ошибками
-    echo Отчеты все равно будут сгенерированы
+    echo WARNING: Some tests failed
+    echo Reports will be generated anyway
     echo.
 )
 
-REM Генерация Allure отчета
+REM Generate Allure report
 echo.
-echo [5/5] Генерация Allure отчета...
+echo [5/5] Generating Allure report...
 where allure >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
-    echo ⚠ Внимание: Allure CLI не установлен
-    echo HTML отчет доступен, но Allure отчет пропущен
+    echo WARNING: Allure CLI not installed
+    echo HTML report available, but Allure report skipped
     echo.
-    echo Установите Allure CLI:
+    echo Install Allure CLI:
     echo   scoop install allure
-    echo   ИЛИ
-    echo   Скачайте: https://github.com/allure-framework/allure2/releases
+    echo   OR
+    echo   Download: https://github.com/allure-framework/allure2/releases
     echo.
     goto :open_html
 )
 
 allure generate reports/allure-results -o reports/allure-report --clean
 if %errorlevel% neq 0 (
-    echo ✖ Не удалось сгенерировать Allure отчет
+    echo ERROR: Failed to generate Allure report
     goto :open_html
 )
-echo ✓ Allure отчет сгенерирован
+echo OK: Allure report generated
 echo.
 
-REM Открытие отчетов
+REM Open reports
 :open_html
 echo.
-echo ╔════════════════════════════════════════════════════════════╗
-echo ║  ГОТОВО! ОТКРЫВАЕМ ОТЧЕТЫ                                 ║
-echo ╚════════════════════════════════════════════════════════════╝
+echo ====================================================================
+echo   DONE! OPENING REPORTS
+echo ====================================================================
 echo.
 
-echo Открываем HTML отчет...
+echo Opening HTML report...
 start "" "%CD%\reports\report.html"
 
-REM Задержка перед открытием Allure
+REM Delay before opening Allure
 timeout /t 2 /nobreak >nul
 
 if exist "reports\allure-report\index.html" (
-    echo Открываем Allure отчет...
+    echo Opening Allure report...
     start "" "%CD%\reports\allure-report\index.html"
     echo.
-    echo ✓ Оба отчета открыты в браузере!
+    echo OK: Both reports opened in browser!
 ) else (
-    echo ✓ HTML отчет открыт в браузере!
+    echo OK: HTML report opened in browser!
 )
 
 echo.
-echo ════════════════════════════════════════════════════════════
-echo ОТЧЕТЫ:
+echo ====================================================================
+echo REPORTS:
 echo   - HTML:   reports\report.html
 if exist "reports\allure-report\index.html" (
     echo   - Allure: reports\allure-report\index.html
 )
-echo ════════════════════════════════════════════════════════════
+echo ====================================================================
 echo.
 pause
