@@ -202,18 +202,55 @@ if exist "reports\allure-report\index.html" (
 
 echo.
 echo ====================================================================
-echo SUMMARY:
-echo   OK: Tests generated: ai_generated_tests\
-echo   OK: Tests executed
-echo   OK: Reports created:
-echo     - HTML:   reports\report.html
-if exist "reports\allure-report\index.html" (
-    echo     - Allure: reports\allure-report\index.html
-)
+echo   PIPELINE EXECUTION SUMMARY
 echo ====================================================================
 echo.
-echo To run again:
-echo   - Generate only: 1_generate_tests_ollama.bat
-echo   - Run only:      2_run_tests_with_reports.bat
+echo [STAGE 1] TEST GENERATION
+echo   Status:        OK
+echo   Output folder: ai_generated_tests\
+echo   Generated:
+for %%f in (ai_generated_tests\*.py) do (
+    echo     - %%~nxf
+)
+echo.
+echo [STAGE 2] TEST EXECUTION
+echo   Test folder:   ai_generated_tests\
+echo   Status:        COMPLETED
+echo   Duration:      Check reports for details
+echo.
+echo ====================================================================
+echo   REPORTS GENERATED
+echo ====================================================================
+echo.
+echo [HTML REPORT]
+echo   File:     reports\report.html
+echo   Status:   %CD%\reports\report.html
+echo   Browser:  OPENED
+echo.
+if exist "reports\allure-report\index.html" (
+    echo [ALLURE REPORT]
+    echo   File:     reports\allure-report\index.html
+    echo   Status:   %CD%\reports\allure-report\index.html
+    echo   Browser:  OPENED
+    echo.
+)
+echo ====================================================================
+echo   USEFUL COMMANDS
+echo ====================================================================
+echo.
+echo Run individual steps:
+echo   1_generate_tests_ollama.bat  - Generate tests only
+echo   2_run_tests_with_reports.bat - Run tests with reports only
+echo.
+echo Rerun this full pipeline:
+echo   3_full_pipeline_ollama.bat
+echo.
+echo View reports again:
+echo   start reports\report.html
+if exist "reports\allure-report\index.html" (
+    echo   start reports\allure-report\index.html
+)
+echo.
+echo ====================================================================
 echo.
 pause

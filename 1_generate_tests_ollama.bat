@@ -97,13 +97,20 @@ echo ====================================================================
 echo   DONE! Tests created in: ai_generated_tests\
 echo ====================================================================
 echo.
-echo Contents:
+
+echo Generated files:
 dir ai_generated_tests /b
 echo.
+
 echo ====================================================================
-echo NEXT STEP: Run tests and get reports
+echo OUTPUT:
+echo   - Tests folder: ai_generated_tests\
+echo   - Test files:   ai_generated_tests\*.py
+echo   - Config:       ai_generated_tests\conftest.py
+echo ====================================================================
 echo.
-echo Run: 2_run_tests_with_reports.bat
+echo NEXT STEP: Run tests and get reports
+echo   Run: 2_run_tests_with_reports.bat
 echo ====================================================================
 echo.
 pause

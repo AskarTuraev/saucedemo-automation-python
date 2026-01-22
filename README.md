@@ -45,15 +45,23 @@
 # ВАРИАНТ 1: Полный цикл (генерация + запуск + отчеты)
 .\3_full_pipeline_ollama.bat
 # ⏱ 10-15 минут | ✅ БЕСПЛАТНО | 🔒 Локально
+# 📊 Подробная отчётность с разбивкой по стадиям пайплайна
 
 # ВАРИАНТ 2: Только генерация тестов
 .\1_generate_tests_ollama.bat
 # ⏱ 5-10 минут | 💡 Ollama медленнее OpenAI, но FREE!
+# 📋 Структурированный отчёт о сгенерированных файлах
 
 # ВАРИАНТ 3: Только запуск тестов + отчеты
 .\2_run_tests_with_reports.bat
 # ⏱ 2-5 минут | 📊 HTML + Allure отчеты автоматически
 ```
+
+**✨ Что нового в отчётах:**
+- 📊 **Структурированный вывод** - чёткая разбивка по этапам выполнения
+- 📈 **Детальная статистика** - информация о сгенерированных файлах и результатах
+- 🎯 **Пути к отчётам** - прямые ссылки на HTML и Allure отчёты
+- 💡 **Полезные команды** - подсказки для повторного запуска
 
 **Требования:**
 1. Установите Ollama: https://ollama.ai/download
@@ -105,6 +113,99 @@ python -m spacy download en_core_web_sm
 
 # Linux/Mac:
 echo "OPENAI_API_KEY=sk-your-key" > .env
+```
+
+---
+
+## 📊 Структура отчётов в bat-файлах
+
+Все bat-файлы теперь имеют **единообразную структуру отчётов**:
+
+### 1_generate_tests_ollama.bat
+```
+====================================================================
+  DONE! Tests created in: ai_generated_tests\
+====================================================================
+
+Generated files:
+  test_login.py
+  conftest.py
+  ...
+
+====================================================================
+OUTPUT:
+  - Tests folder: ai_generated_tests\
+  - Test files:   ai_generated_tests\*.py
+  - Config:       ai_generated_tests\conftest.py
+====================================================================
+
+NEXT STEP: Run tests and get reports
+  Run: 2_run_tests_with_reports.bat
+====================================================================
+```
+
+### 2_run_tests_with_reports.bat
+```
+====================================================================
+  DONE! OPENING REPORTS
+====================================================================
+
+OK: Both reports opened in browser!
+
+====================================================================
+REPORTS:
+  - HTML:   reports\report.html
+  - Allure: reports\allure-report\index.html
+====================================================================
+```
+
+### 3_full_pipeline_ollama.bat
+```
+====================================================================
+  PIPELINE EXECUTION SUMMARY
+====================================================================
+
+[STAGE 1] TEST GENERATION
+  Status:        OK
+  Output folder: ai_generated_tests\
+  Generated:
+    - test_login.py
+    - conftest.py
+
+[STAGE 2] TEST EXECUTION
+  Test folder:   ai_generated_tests\
+  Status:        COMPLETED
+  Duration:      Check reports for details
+
+====================================================================
+  REPORTS GENERATED
+====================================================================
+
+[HTML REPORT]
+  File:     reports\report.html
+  Status:   C:\path\to\reports\report.html
+  Browser:  OPENED
+
+[ALLURE REPORT]
+  File:     reports\allure-report\index.html
+  Status:   C:\path\to\reports\allure-report\index.html
+  Browser:  OPENED
+
+====================================================================
+  USEFUL COMMANDS
+====================================================================
+
+Run individual steps:
+  1_generate_tests_ollama.bat  - Generate tests only
+  2_run_tests_with_reports.bat - Run tests with reports only
+
+Rerun this full pipeline:
+  3_full_pipeline_ollama.bat
+
+View reports again:
+  start reports\report.html
+  start reports\allure-report\index.html
+====================================================================
 ```
 
 ---
