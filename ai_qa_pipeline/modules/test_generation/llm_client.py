@@ -218,7 +218,7 @@ class LLMClient:
 
     def _fix_incomplete_json(self, json_str: str) -> str:
         """
-        Попытка исправить неполный JSON ответ от Ollama
+        Попытка исправить неполный или некорректный JSON ответ от Ollama
 
         Args:
             json_str: Неполный JSON строка
@@ -226,22 +226,61 @@ class LLMClient:
         Returns:
             Исправленный JSON строка
         """
-        # Подсчитываем незакрытые скобки
-        open_braces = json_str.count('{')
-        close_braces = json_str.count('}')
-        open_brackets = json_str.count('[')
-        close_brackets = json_str.count(']')
+        # Попытка 1: Исправить структурные ошибки (неправильные скобки)
+        fixed = self._fix_bracket_mismatches(json_str)
 
-        # Добавляем недостающие закрывающие скобки
+        # Попытка 2: Добавить недостающие закрывающие скобки
+        open_braces = fixed.count('{')
+        close_braces = fixed.count('}')
+        open_brackets = fixed.count('[')
+        close_brackets = fixed.count(']')
+
         missing_brackets = open_brackets - close_brackets
         missing_braces = open_braces - close_braces
 
-        fixed = json_str
         # Сначала закрываем массивы, потом объекты
         fixed += ']' * missing_brackets
         fixed += '}' * missing_braces
 
         return fixed
+
+    def _fix_bracket_mismatches(self, json_str: str) -> str:
+        """
+        Исправляет неправильные типы скобок в JSON
+
+        Например: {...}] вместо {...}}
+
+        Args:
+            json_str: JSON строка с возможными ошибками
+
+        Returns:
+            Исправленный JSON строка
+        """
+        stack = []
+        result = list(json_str)
+
+        for i, char in enumerate(json_str):
+            if char == '{':
+                stack.append(('{', i))
+            elif char == '[':
+                stack.append(('[', i))
+            elif char == '}':
+                if stack and stack[-1][0] == '{':
+                    stack.pop()
+                elif stack and stack[-1][0] == '[':
+                    # Неправильная скобка: должно быть ] но стоит }
+                    # Пропускаем, оставляем как есть
+                    pass
+            elif char == ']':
+                if stack and stack[-1][0] == '[':
+                    stack.pop()
+                elif stack and stack[-1][0] == '{':
+                    # Неправильная скобка: должно быть } но стоит ]
+                    # Исправляем на }
+                    result[i] = '}'
+                    stack.pop()
+
+        return ''.join(result)
 
     def generate_json(
         self,
