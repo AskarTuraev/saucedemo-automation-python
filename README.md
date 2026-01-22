@@ -37,6 +37,33 @@
 
 ---
 
+## 🆕 NEW: FREE Ollama Scripts (No API Keys Required!)
+
+**🎉 Теперь можно использовать полностью БЕСПЛАТНО с Ollama (локальная AI):**
+
+```powershell
+# ВАРИАНТ 1: Полный цикл (генерация + запуск + отчеты)
+.\3_full_pipeline_ollama.bat
+# ⏱ 10-15 минут | ✅ БЕСПЛАТНО | 🔒 Локально
+
+# ВАРИАНТ 2: Только генерация тестов
+.\1_generate_tests_ollama.bat
+# ⏱ 5-10 минут | 💡 Ollama медленнее OpenAI, но FREE!
+
+# ВАРИАНТ 3: Только запуск тестов + отчеты
+.\2_run_tests_with_reports.bat
+# ⏱ 2-5 минут | 📊 HTML + Allure отчеты автоматически
+```
+
+**Требования:**
+1. Установите Ollama: https://ollama.ai/download
+2. Загрузите модель: `ollama pull llama2`
+3. Запустите любой bat-файл!
+
+**Подробнее:** См. [ЗАПУСК.md](ЗАПУСК.md) для детальных инструкций
+
+---
+
 ## 🚀 Quick Start
 
 > **Самый быстрый способ:** [QUICKSTART_RU.md](QUICKSTART_RU.md) или просто запустите `setup.bat`
@@ -84,7 +111,27 @@ echo "OPENAI_API_KEY=sk-your-key" > .env
 
 ## 🎬 Использование
 
-### Option 1: AI-Driven Pipeline (Полная генерация)
+### Option 1A: Ollama (FREE - Рекомендуется для начинающих!)
+
+**🆕 Бесплатная генерация с локальной AI:**
+
+```powershell
+# 🎯 ПОЛНЫЙ ЦИКЛ (всё в одном)
+.\3_full_pipeline_ollama.bat
+# Генерирует тесты → Запускает → Создаёт отчеты → Открывает в браузере
+
+# 🔧 ПО ШАГАМ
+.\1_generate_tests_ollama.bat  # Генерация тестов с Ollama
+.\2_run_tests_with_reports.bat # Запуск + HTML/Allure отчеты
+```
+
+**Преимущества Ollama:**
+- ✅ Полностью бесплатно (без API ключей)
+- ✅ Работает локально (приватность)
+- ✅ Не нужен интернет (после установки модели)
+- ⚠️ Медленнее OpenAI (5-10 минут вместо 2-3)
+
+### Option 1B: OpenAI/Claude (Быстрее, но платно)
 
 **Генерация тестов из текстовых требований:**
 
@@ -93,8 +140,8 @@ echo "OPENAI_API_KEY=sk-your-key" > .env
 # ВАЖНО для PowerShell: команда ОДНОЙ СТРОКОЙ (без \)
 python -m ai_qa_pipeline.modules.code_generation.cli full requirements.txt --base-url https://www.saucedemo.com --llm openai --output generated_tests
 
-# ИЛИ используйте готовый скрипт:
-.\quick_test.bat
+# Для Ollama используйте bat-файлы выше (рекомендуется!)
+# Старые скрипты с OpenAI в папке: old_scripts/
 
 # Результат:
 # ✓ PII sanitized
@@ -151,6 +198,11 @@ pytest -v
 
 ```
 saucedemo_automation/
+├── 🆕 1_generate_tests_ollama.bat    # Generate tests with Ollama (FREE)
+├── 🆕 2_run_tests_with_reports.bat    # Run tests + auto-open reports
+├── 🆕 3_full_pipeline_ollama.bat      # Full cycle (all-in-one)
+├── 🆕 ЗАПУСК.md                       # Russian quick start guide
+│
 ├── ai_qa_pipeline/                    # ⭐ AI-Driven QA Pipeline
 │   ├── modules/
 │   │   ├── pii_detection/             # Stage 1: PII Protection
@@ -172,12 +224,23 @@ saucedemo_automation/
 │   ├── cart_page.py
 │   └── checkout_page.py
 │
+├── reports/                           # 🆕 Auto-generated reports
+│   ├── report.html                    # HTML report (auto-opens)
+│   ├── allure-results/                # Allure data
+│   └── allure-report/                 # Allure report (auto-opens)
+│
+├── old_scripts/                       # 🗄️ Legacy OpenAI scripts
+│   ├── quick_test.bat
+│   ├── quick_test_ollama.bat
+│   └── test_pii.bat
+│
 ├── .github/workflows/
 │   └── ai_qa_pipeline.yml            # CI/CD (10 stages)
 │
 ├── PRESENTATION.md                   # 21-slide presentation
 ├── DEMO_SCRIPT.md                    # Demo scenario
 ├── PROJECT_SUMMARY.md                # Project metrics
+├── SESSION_CONTEXT.md                # 🆕 Full session context
 ├── requirements.txt                  # All dependencies
 └── README.md                         # This file
 ```
@@ -278,11 +341,20 @@ python -m ai_qa_pipeline.modules.code_review.cli full \
 ## 📊 Метрики и производительность
 
 ### AI Pipeline:
-- **Генерация 1 сценария:** 5-15 секунд (GPT-4)
+
+**С OpenAI (GPT-4):**
+- **Генерация 1 сценария:** 5-15 секунд
+- **Full pipeline (5 tests):** 2-3 минуты
+- **Стоимость:** ~$0.25 per full pipeline
+
+**С Ollama (llama2) - БЕСПЛАТНО:**
+- **Генерация 1 сценария:** 30-60 секунд
+- **Full pipeline (5 tests):** 5-10 минут
+- **Стоимость:** $0.00 (полностью бесплатно!)
+
+**Общие метрики:**
 - **Генерация кода:** <1 секунда/файл
 - **Code review:** 10-20 секунд/файл
-- **Full pipeline (5 tests):** 2-3 минуты
-- **Стоимость (OpenAI):** ~$0.25 per full pipeline
 
 ### Quality Metrics:
 - **Test generation accuracy:** ~85-90%
@@ -375,8 +447,9 @@ TEST_PASSWORD=secret_sauce
 | **AI Code Review** | ✅ GPT-4 | ❌ | ❌ | ❌ |
 | **Auto Bug Reports** | ✅ | ❌ | ❌ | ❌ |
 | **Open Source** | ✅ MIT | ❌ | ❌ | ❌ |
-| **Cost/month** | ~$25 | $900 | $450 | $450 |
+| **Cost/month** | **$0** (Ollama) or ~$25 (OpenAI) | $900 | $450 | $450 |
 | **Self-hosted** | ✅ | ❌ | ❌ | ❌ |
+| **FREE Option** | ✅ Ollama | ❌ | ❌ | ❌ |
 
 ---
 
