@@ -169,6 +169,7 @@ echo TIP: Scroll up in this window to review test execution logs
 echo      You can see all test results, errors, and warnings
 echo.
 echo ====================================================================
-echo Close this window when done reviewing, or press any key...
+echo Window will stay open. Close manually or type 'exit' to close.
 echo ====================================================================
-pause >nul
+echo.
+cmd /k

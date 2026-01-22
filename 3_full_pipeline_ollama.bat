@@ -284,6 +284,7 @@ echo TIP: Scroll up in this window to review the full execution log
 echo      You can see all stages, generated files, and test results
 echo.
 echo ====================================================================
-echo Close this window when done reviewing, or press any key...
+echo Window will stay open. Close manually or type 'exit' to close.
 echo ====================================================================
-pause >nul
+echo.
+cmd /k

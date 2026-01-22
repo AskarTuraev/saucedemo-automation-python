@@ -113,4 +113,8 @@ echo NEXT STEP: Run tests and get reports
 echo   Run: 2_run_tests_with_reports.bat
 echo ====================================================================
 echo.
-pause
+echo ====================================================================
+echo Window will stay open. Close manually or type 'exit' to close.
+echo ====================================================================
+echo.
+cmd /k
