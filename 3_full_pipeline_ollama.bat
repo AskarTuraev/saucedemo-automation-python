@@ -31,7 +31,7 @@ echo.
 REM Check Ollama
 echo [1/9] Checking Ollama installation...
 ollama --version >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo ERROR: Ollama not found!
     echo.
@@ -49,7 +49,7 @@ echo.
 REM Check model
 echo [2/9] Checking llama2 model...
 ollama list | findstr llama2 >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo WARNING: Model llama2 not found
     echo Downloading model (~4GB, may take 5-10 minutes)...
@@ -126,7 +126,7 @@ echo.
 REM Check dependencies
 echo [6/9] Checking dependencies...
 pip show allure-pytest >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo Installing allure-pytest...
     pip install allure-pytest
 )
@@ -151,7 +151,7 @@ echo NOTE: This may take a few minutes...
 echo.
 pytest ai_generated_tests -v --headed --html=reports/report.html --self-contained-html --alluredir=reports/allure-results
 
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo WARNING: Some tests failed
     echo Reports will be generated anyway
@@ -162,7 +162,7 @@ REM Generate Allure report
 echo.
 echo [9/9] Generating Allure report...
 where allure >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo WARNING: Allure CLI not installed
     echo HTML report will be available, but Allure report skipped
@@ -171,7 +171,7 @@ if %errorlevel% neq 0 (
 )
 
 allure generate reports/allure-results -o reports/allure-report --clean
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo ERROR: Failed to generate Allure report
     goto :open_html
 )

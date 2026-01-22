@@ -24,7 +24,7 @@ echo.
 REM Install allure-pytest if needed
 echo [2/5] Checking dependencies...
 pip show allure-pytest >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo Installing allure-pytest...
     pip install allure-pytest
 )
@@ -57,7 +57,7 @@ echo.
 pytest %TEST_DIR% -v --headed --html=reports/report.html --self-contained-html --alluredir=reports/allure-results
 
 REM Check result
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo WARNING: Some tests failed
     echo Reports will be generated anyway
@@ -68,7 +68,7 @@ REM Generate Allure report
 echo.
 echo [5/5] Generating Allure report...
 where allure >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo WARNING: Allure CLI not installed
     echo HTML report available, but Allure report skipped
@@ -82,7 +82,7 @@ if %errorlevel% neq 0 (
 )
 
 allure generate reports/allure-results -o reports/allure-report --clean
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo ERROR: Failed to generate Allure report
     goto :open_html
 )

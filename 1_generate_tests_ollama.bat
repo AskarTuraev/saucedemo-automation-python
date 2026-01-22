@@ -12,7 +12,7 @@ echo.
 REM Check Ollama
 echo [1/6] Checking Ollama installation...
 ollama --version >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo ERROR: Ollama not found!
     echo.
@@ -30,12 +30,12 @@ echo.
 REM Check model
 echo [2/6] Checking llama2 model...
 ollama list | findstr llama2 >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo.
     echo WARNING: Model llama2 not found
     echo Downloading model (~4GB, may take 5-10 minutes)...
     ollama pull llama2
-    if %errorlevel% neq 0 (
+    if errorlevel 1 (
         echo.
         echo ERROR: Failed to download model
         pause
