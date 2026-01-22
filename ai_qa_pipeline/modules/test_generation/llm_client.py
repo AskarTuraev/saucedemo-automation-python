@@ -187,6 +187,33 @@ class LLMClient:
 
         return response['message']['content']
 
+    def _fix_incomplete_json(self, json_str: str) -> str:
+        """
+        Попытка исправить неполный JSON ответ от Ollama
+
+        Args:
+            json_str: Неполный JSON строка
+
+        Returns:
+            Исправленный JSON строка
+        """
+        # Подсчитываем незакрытые скобки
+        open_braces = json_str.count('{')
+        close_braces = json_str.count('}')
+        open_brackets = json_str.count('[')
+        close_brackets = json_str.count(']')
+
+        # Добавляем недостающие закрывающие скобки
+        missing_brackets = open_brackets - close_brackets
+        missing_braces = open_braces - close_braces
+
+        fixed = json_str
+        # Сначала закрываем массивы, потом объекты
+        fixed += ']' * missing_brackets
+        fixed += '}' * missing_braces
+
+        return fixed
+
     def generate_json(
         self,
         prompt: str,
@@ -226,7 +253,12 @@ class LLMClient:
         try:
             return json.loads(response)
         except json.JSONDecodeError as e:
-            raise ValueError(f"Failed to parse JSON response: {e}\nResponse: {response}")
+            # Попытка починить неполный JSON от Ollama
+            try:
+                fixed_response = self._fix_incomplete_json(response)
+                return json.loads(fixed_response)
+            except (json.JSONDecodeError, ValueError):
+                raise ValueError(f"Failed to parse JSON response: {e}\nResponse: {response}")
 
     def batch_generate(
         self,
