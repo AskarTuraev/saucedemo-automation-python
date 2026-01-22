@@ -50,7 +50,7 @@ echo.
 
 REM Check model
 echo [2/9] Checking llama2 model...
-ollama list | findstr llama2 >nul 2>&1
+ollama list | find "llama2" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo WARNING: Model llama2 not found
