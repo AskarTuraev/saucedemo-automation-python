@@ -5,6 +5,9 @@ __pycache__/
 venv/
 .env
 
+# Generated files
+quick_requirements.txt
+
 # Pytest
 .pytest_cache/
 

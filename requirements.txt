@@ -26,7 +26,7 @@ langchain==0.1.0
 langchain-openai==0.0.2
 
 # Alternative: Local LLM with Ollama
-# ollama-python==0.1.5
+ollama==0.1.5
 
 # JSON Schema & Validation (Stage 4)
 jsonschema==4.20.0
