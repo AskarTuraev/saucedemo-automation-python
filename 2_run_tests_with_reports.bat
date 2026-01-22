@@ -89,36 +89,86 @@ if errorlevel 1 (
 echo OK: Allure report generated
 echo.
 
-REM Open reports
+REM Display report summary
 :open_html
 echo.
 echo ====================================================================
-echo   DONE! OPENING REPORTS
+echo   TEST EXECUTION COMPLETED
 echo ====================================================================
 echo.
 
-echo Opening HTML report...
-start "" "%CD%\reports\report.html"
-
-REM Delay before opening Allure
-timeout /t 2 /nobreak >nul
+REM Check report files
+if exist "reports\report.html" (
+    echo [HTML REPORT]
+    echo   File:   reports\report.html
+    echo   Path:   %CD%\reports\report.html
+    echo   Status: READY
+    echo.
+) else (
+    echo [HTML REPORT]
+    echo   Status: NOT FOUND
+    echo.
+)
 
 if exist "reports\allure-report\index.html" (
-    echo Opening Allure report...
+    echo [ALLURE REPORT]
+    echo   File:   reports\allure-report\index.html
+    echo   Path:   %CD%\reports\allure-report\index.html
+    echo   Status: READY
+    echo.
+) else (
+    echo [ALLURE REPORT]
+    echo   Status: NOT GENERATED (Allure CLI not installed)
+    echo.
+)
+
+echo ====================================================================
+echo   OPENING REPORTS IN BROWSER
+echo ====================================================================
+echo.
+
+REM Open reports
+if exist "reports\report.html" (
+    echo [1/2] Opening HTML report...
+    start "" "%CD%\reports\report.html"
+    timeout /t 1 /nobreak >nul
+) else (
+    echo [ERROR] HTML report not found
+)
+
+if exist "reports\allure-report\index.html" (
+    echo [2/2] Opening Allure report...
     start "" "%CD%\reports\allure-report\index.html"
+    timeout /t 1 /nobreak >nul
     echo.
     echo OK: Both reports opened in browser!
 ) else (
+    echo.
     echo OK: HTML report opened in browser!
 )
 
 echo.
 echo ====================================================================
-echo REPORTS:
-echo   - HTML:   reports\report.html
+echo   EXECUTION SUMMARY
+echo ====================================================================
+echo.
+echo Test execution completed successfully
+echo Reports generated and opened in your browser
+echo.
+echo Available reports:
+if exist "reports\report.html" (
+    echo   - HTML:   reports\report.html
+)
 if exist "reports\allure-report\index.html" (
     echo   - Allure: reports\allure-report\index.html
 )
+echo.
 echo ====================================================================
 echo.
-pause
+echo TIP: Scroll up in this window to review test execution logs
+echo      You can see all test results, errors, and warnings
+echo.
+echo ====================================================================
+echo Close this window when done reviewing, or press any key...
+echo ====================================================================
+pause >nul

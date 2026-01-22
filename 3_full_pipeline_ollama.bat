@@ -16,6 +16,8 @@ echo   4. Open reports in browser
 echo.
 echo Total time: 10-15 minutes
 echo.
+echo TIP: Scroll up in this window to review the full execution log
+echo.
 pause
 
 REM ========================================
@@ -178,28 +180,8 @@ if errorlevel 1 (
 echo OK: Allure report generated
 echo.
 
-REM Open reports
+REM Display summary first
 :open_html
-echo.
-echo ====================================================================
-echo   FULL PIPELINE COMPLETE! OPENING REPORTS
-echo ====================================================================
-echo.
-
-echo Opening HTML report...
-start "" "%CD%\reports\report.html"
-
-timeout /t 2 /nobreak >nul
-
-if exist "reports\allure-report\index.html" (
-    echo Opening Allure report...
-    start "" "%CD%\reports\allure-report\index.html"
-    echo.
-    echo OK: Both reports opened in browser!
-) else (
-    echo OK: HTML report opened in browser!
-)
-
 echo.
 echo ====================================================================
 echo   PIPELINE EXECUTION SUMMARY
@@ -222,18 +204,32 @@ echo ====================================================================
 echo   REPORTS GENERATED
 echo ====================================================================
 echo.
-echo [HTML REPORT]
-echo   File:     reports\report.html
-echo   Status:   %CD%\reports\report.html
-echo   Browser:  OPENED
-echo.
+
+REM Check and display report status
+if exist "reports\report.html" (
+    echo [HTML REPORT]
+    echo   File:     reports\report.html
+    echo   Path:     %CD%\reports\report.html
+    echo   Status:   READY
+    echo.
+) else (
+    echo [HTML REPORT]
+    echo   Status:   NOT FOUND
+    echo.
+)
+
 if exist "reports\allure-report\index.html" (
     echo [ALLURE REPORT]
     echo   File:     reports\allure-report\index.html
-    echo   Status:   %CD%\reports\allure-report\index.html
-    echo   Browser:  OPENED
+    echo   Path:     %CD%\reports\allure-report\index.html
+    echo   Status:   READY
+    echo.
+) else (
+    echo [ALLURE REPORT]
+    echo   Status:   NOT GENERATED (Allure CLI not installed)
     echo.
 )
+
 echo ====================================================================
 echo   USEFUL COMMANDS
 echo ====================================================================
@@ -245,7 +241,7 @@ echo.
 echo Rerun this full pipeline:
 echo   3_full_pipeline_ollama.bat
 echo.
-echo View reports again:
+echo View reports manually:
 echo   start reports\report.html
 if exist "reports\allure-report\index.html" (
     echo   start reports\allure-report\index.html
@@ -253,4 +249,41 @@ if exist "reports\allure-report\index.html" (
 echo.
 echo ====================================================================
 echo.
-pause
+
+REM Now open reports in browser
+echo Opening reports in browser...
+echo.
+
+if exist "reports\report.html" (
+    echo [1/2] Opening HTML report...
+    start "" "%CD%\reports\report.html"
+    timeout /t 1 /nobreak >nul
+) else (
+    echo [ERROR] HTML report not found: reports\report.html
+)
+
+if exist "reports\allure-report\index.html" (
+    echo [2/2] Opening Allure report...
+    start "" "%CD%\reports\allure-report\index.html"
+    timeout /t 1 /nobreak >nul
+    echo.
+    echo OK: Both reports opened in browser!
+) else (
+    echo.
+    echo OK: HTML report opened in browser!
+)
+
+echo.
+echo ====================================================================
+echo   PIPELINE COMPLETED SUCCESSFULLY!
+echo ====================================================================
+echo.
+echo Reports opened in browser (check your browser tabs)
+echo.
+echo TIP: Scroll up in this window to review the full execution log
+echo      You can see all stages, generated files, and test results
+echo.
+echo ====================================================================
+echo Close this window when done reviewing, or press any key...
+echo ====================================================================
+pause >nul
